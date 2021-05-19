@@ -10,10 +10,12 @@ import { Machine, assign } from 'xstate'
   // - actions
   // - XState (all XState exports)
 
-  const invokeBeers = (context) => {
-    const { searchTerm = '' } = context;
+  const invokeBeers = (context, event) => {
+    const { value: searchTerm = '' } = event
 
-    const param = searchTerm && `?beer_name:${searchTerm}`
+    console.log({ event })
+
+    const param = searchTerm && `?beer_name=${searchTerm}`
 
     return fetch(`https://api.punkapi.com/v2/beers${param}`)
       .then(res => {
@@ -55,9 +57,7 @@ import { Machine, assign } from 'xstate'
           }
         },
       },
-      success: {
-        type: 'final'
-      },
+      success: {},
       failed: {
         type: 'final'
       },
@@ -74,6 +74,11 @@ import { Machine, assign } from 'xstate'
             cond: (context) => context.retries > 1
           }]
         }
+      }
+    },
+    on: {
+      SEARCH: {
+        target: "loading",
       }
     }
   });
