@@ -1,19 +1,6 @@
 import { Machine, assign } from 'xstate'
-  // Available variables:
-  // - Machine
-  // - interpret
-  // - assign
-  // - send
-  // - sendParent
-  // - spawn
-  // - raise
-  // - actions
-  // - XState (all XState exports)
-
   const invokeBeers = (context, event) => {
-    const { value: searchTerm = '' } = event
-
-    console.log({ event })
+    const { searchTerm = '' } = event
 
     const param = searchTerm && `?beer_name=${searchTerm}`
 
@@ -27,11 +14,11 @@ import { Machine, assign } from 'xstate'
   }
 
 
-  const beerMachine = Machine({
-    id: 'fetch',
+  const beersMachine = Machine({
+    id: 'beer',
     initial: 'idle',
     context: {
-      retries: 0
+      retries: 0,
     },
     states: {
       idle: {
@@ -58,9 +45,7 @@ import { Machine, assign } from 'xstate'
         },
       },
       success: {},
-      failed: {
-        type: 'final'
-      },
+      failed: {},
       error: {
         on: {
           RETRY: [{
@@ -81,7 +66,8 @@ import { Machine, assign } from 'xstate'
         target: "loading",
       }
     }
-  });
+  }
+);
 
 
-  export default beerMachine
+  export default beersMachine

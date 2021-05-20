@@ -18,6 +18,12 @@
   color: white;
 }
 
+.App-split {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+}
+
 .App-link {
   color: #61dafb;
 }
