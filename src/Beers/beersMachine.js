@@ -90,9 +90,4 @@ const beersMachine = Machine({
   }
 });
 
-// const serlialized = JSON.stringify(beersMachine)
-// // const serlialized = beersMachine.toJSON()
-// console.log(serlialized)
-// const parsed = JSON.parse(serlialized)
-
 export default beersMachine

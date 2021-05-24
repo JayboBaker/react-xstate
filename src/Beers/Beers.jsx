@@ -17,7 +17,7 @@ const Messaging = ({ beers, retries, state, handleItemClick }) => {
       return <p>No beers match that search term</p>
     }
     case 'success': {
-      return <BeersList {... {beers, handleItemClick }} />
+      return <BeersList {... { beers, handleItemClick }} />
     }
     default: {
       return <p>Please enter a search term</p>
@@ -28,7 +28,7 @@ const Messaging = ({ beers, retries, state, handleItemClick }) => {
 
 export default ({ actor, handleItemClick }) => {
   const [current, send] = useActor(actor)
-  if (!current) return null
+
   const { context } = current
   const { beers, retries } = context
 

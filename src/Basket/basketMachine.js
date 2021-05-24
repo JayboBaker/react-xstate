@@ -24,7 +24,6 @@ const basketMachine = Machine({
 },
   {
     actions: {
-      // addItem: (c, e) => {console.log('add item', {c, e})}
       addItem: assign({
         items: (context, { payload }) => {
           console.log({ payload })
