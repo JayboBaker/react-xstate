@@ -15,12 +15,12 @@ const appMachine = Machine(
     },
     states: {
       initial: {
-        entry: ['spawnBeers', 'spawnBasket']
+        entry: ['spawnBeers']
       }
     },
     on: {
       ADD_TO_BASKET: {
-        actions: ['addToBasket']
+        actions: ['spawnBasket', 'addToBasket']
       }
     },
   },
