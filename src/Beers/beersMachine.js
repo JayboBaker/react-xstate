@@ -1,6 +1,6 @@
 import { Machine, assign, send } from 'xstate'
 
-const beersMachine = Machine({
+const stateMachine = {
   id: 'beer',
   initial: 'idle',
   context: {
@@ -31,7 +31,7 @@ const beersMachine = Machine({
       always:[
         {
           target: 'noResults',
-          cond: (context) => !context.beers.length
+          cond: 'hasResults'
         },
         {
           target: 'success',
@@ -46,9 +46,7 @@ const beersMachine = Machine({
         },
         {
           target: 'loading',
-          actions: assign({
-            retries: (context) => context.retries + 1
-          }),
+          actions: 'updateRetries',
         },
       ]
     }
@@ -58,8 +56,9 @@ const beersMachine = Machine({
       target: 'loading',
     },
   }
-},
-{
+}
+
+const stateCharts =  {
   actions: {
     handleResolved: assign({
       beers: (_, event) => event.data,
@@ -68,9 +67,13 @@ const beersMachine = Machine({
     handleError: assign({
       error: (_, event) => event.data,
       lastUpdated: () => Date.now()
+    }),
+    updateRetries: assign({
+      retries: (context) => context.retries + 1
     })
   },
   guards: {
+    hasResults: (context) => !context.beers.length,
     hasRetriedMax: (context) => context.retries >= 3
   },
   services: {
@@ -88,6 +91,8 @@ const beersMachine = Machine({
       })
     }
   }
-});
+}
+
+const beersMachine = Machine(stateMachine, stateCharts)
 
 export default beersMachine
