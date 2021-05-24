@@ -1,23 +1,43 @@
 import { useActor } from '@xstate/react'
 
-const BeersList = ({ beers = [] }) => beers.map(({ name, description, id }) => <div key={id}>{name}</div>)
+const BeersList = ({ beers = [], handleItemClick }) => beers.map(({ name, id }) => <div onClick={handleItemClick({ name, id })} key={id}>{name}</div>)
 
-export default ({ actor }) => {
+const Messaging = ({ beers, retries, state, handleItemClick }) => {
+  switch (state) {
+    case 'loading': {
+      return <p>Loading beers...</p>
+    }
+    case 'failed': {
+      return <p>Loading beers failed, retried {retries} times</p>
+    }
+    case 'error': {
+      return <p>Loading beers failed, retrying...</p>
+    }
+    case 'noResults': {
+      return <p>No beers match that search term</p>
+    }
+    case 'success': {
+      return <BeersList {... {beers, handleItemClick }} />
+    }
+    default: {
+      return <p>Please enter a search term</p>
+    }
+  }
+}
+
+
+export default ({ actor, handleItemClick }) => {
   const [current, send] = useActor(actor)
-
-  const { beers, error, retries } = current.context
-  console.log('Beers context: ', current.context)
+  if (!current) return null
+  const { context } = current
+  const { beers, retries } = context
 
   return (
     <div>
       <h2>Beers</h2>
-      <input onChange={e => send({ type: "SEARCH", searchTerm: e.target.value })} placeholder='Search beers' />
-      {current.matches('loading') && <p>Loading beers...</p>}
-      {current.matches('failed') && <p>Loading beers failed, retired {retries} times</p>}
-      {current.matches('error') && <p>Loading beers failed, retrying...</p>}
-      {current.matches('success') && <p>Loading beers successful</p>}
-      {current.matches('success') && <p>Loading beers successful</p>}
-      {current.matches('success') && <BeersList beers={beers} />}
+      <input onChange={e => send({ type: 'SEARCH', searchTerm: e.target.value })} placeholder='Search beers' />
+      <Messaging {...{ beers, retries, state: current.value, handleItemClick }} />
     </div>
   )
+
 }

@@ -1,29 +1,40 @@
-import { Machine, assign, spawn } from 'xstate'
+import { Machine, assign, spawn, send } from 'xstate'
 import beersMachine from '../Beers/beersMachine'
+import basketMachine from '../Basket/basketMachine'
+
+const basketId = 'basket'
+const beersId = 'beers'
 
 const appMachine = Machine(
   {
     id: 'app',
-    initial: 'idle',
+    initial: 'initial',
     context: {
-      beersList: [],
       beersRef: null,
-      searchTerm: '',
+      basketRef: null,
     },
     states: {
-      idle: {
-        entry: ['spawnBeers']
+      initial: {
+        entry: ['spawnBeers', 'spawnBasket']
+      }
+    },
+    on: {
+      ADD_TO_BASKET: {
+        actions: ['addToBasket']
       }
     },
   },
   {
     actions: {
-      spawnBeers: assign((context, event) => {
-        return {
-          ...context,
-          beersRef: context.beersRef || spawn(beersMachine)
-        }
-      })
+      addToBasket: (context, event) => context.basketRef.send({ ...event, type: 'ADD' }),
+      spawnBeers: assign((context, event) => ({
+        ...context,
+        beersRef: context.beersRef || spawn(beersMachine, beersId)
+      })),
+      spawnBasket: assign((context, event) => ({
+        ...context,
+        basketRef: context.basketRef || spawn(basketMachine, basketId)
+      }))
     }
   }
 );

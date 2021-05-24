@@ -1,5 +1,80 @@
-import { Machine, assign } from 'xstate'
-  const invokeBeers = (context, event) => {
+import { Machine, assign, send } from 'xstate'
+
+const beersMachine = Machine({
+  id: 'beer',
+  initial: 'idle',
+  context: {
+    retries: 0,
+  },
+  states: {
+    idle: {
+      always: 'loading'
+    },
+    success: {},
+    noResults: {},
+    failed: {},
+    loading: {
+      invoke: {
+        id: 'fetch-beers',
+        src: 'invokeBeers',
+        onDone: {
+          target: 'resolved',
+          actions: ['handleResolved']
+        },
+        onError: {
+          target: 'error',
+          actions: ['handleResolved'],
+        }
+      },
+    },
+    resolved: {
+      always:[
+        {
+          target: 'noResults',
+          cond: (context) => !context.beers.length
+        },
+        {
+          target: 'success',
+        },
+      ]
+    },
+    error: {
+      always: [
+        {
+          target: 'failed',
+          cond: 'hasRetriedMax'
+        },
+        {
+          target: 'loading',
+          actions: assign({
+            retries: (context) => context.retries + 1
+          }),
+        },
+      ]
+    }
+  },
+  on: {
+    SEARCH: {
+      target: 'loading',
+    },
+  }
+},
+{
+  actions: {
+    handleResolved: assign({
+      beers: (_, event) => event.data,
+      lastUpdated: () => Date.now()
+    }),
+    handleError: assign({
+      error: (_, event) => event.data,
+      lastUpdated: () => Date.now()
+    })
+  },
+  guards: {
+    hasRetriedMax: (context) => context.retries >= 3
+  },
+  services: {
+    invokeBeers: (context, event) => {
     const { searchTerm = '' } = event
 
     const param = searchTerm && `?beer_name=${searchTerm}`
@@ -11,63 +86,13 @@ import { Machine, assign } from 'xstate'
         }
         return res.json()
       })
-  }
-
-
-  const beersMachine = Machine({
-    id: 'beer',
-    initial: 'idle',
-    context: {
-      retries: 0,
-    },
-    states: {
-      idle: {
-        always: 'loading'
-      },
-      loading: {
-        invoke: {
-          id: "fetch-beers",
-          src: invokeBeers,
-          onDone: {
-            target: "success",
-            actions: assign({
-              beers: (_, event) => event.data,
-              lastUpdated: () => Date.now()
-            })
-          },
-          onError: {
-            target: "error",
-            actions: assign({
-              error: (_, event) => event.data,
-              lastUpdated: () => Date.now()
-            })
-          }
-        },
-      },
-      success: {},
-      failed: {},
-      error: {
-        on: {
-          RETRY: [{
-            target: 'loading',
-            actions: assign({
-              retries: (context) => context.retries + 1
-            }),
-            cond: (context) => context.retries <= 3
-          },{
-            target: 'failed',
-            cond: (context) => context.retries > 1
-          }]
-        }
-      }
-    },
-    on: {
-      SEARCH: {
-        target: "loading",
-      }
     }
   }
-);
+});
 
+// const serlialized = JSON.stringify(beersMachine)
+// // const serlialized = beersMachine.toJSON()
+// console.log(serlialized)
+// const parsed = JSON.parse(serlialized)
 
-  export default beersMachine
+export default beersMachine
