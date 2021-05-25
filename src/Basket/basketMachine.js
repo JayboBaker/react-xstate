@@ -7,39 +7,41 @@ const basketMachine = Machine({
     items: {}
   },
   states: {
-    empty: {
-      always:         {
-        target: 'notEmpty',
-        cond: (context) => !!Object.values(context.items).length
+    empty: {},
+    notEmpty: {
+      always: {
+        target: 'empty',
+        cond: 'isBasketEmpty'
       },
     },
-    notEmpty: {},
   },
   on: {
     ADD: {
       actions: ['addItem'],
-      target: 'empty',
+      target: 'notEmpty',
     }
   },
 },
-  {
-    actions: {
-      addItem: assign({
-        items: (context, { payload }) => {
-          console.log({ payload })
-          const item = context.items[payload.id] || {}
-          return {
-            ...context.items,
-            [payload.id]: {
-              ...payload,
-              amount: (item.amount || 0) + 1
-            },
-          }
+{
+  actions: {
+    addItem: assign({
+      items: (context, { payload }) => {
+        console.log({ payload })
+        const item = context.items[payload.id] || {}
+        return {
+          ...context.items,
+          [payload.id]: {
+            ...payload,
+            amount: (item.amount || 0) + 1
+          },
         }
-      })
-    }
-  }
-)
+      }
+    })
+  },
+  guards: {
+    isBasketEmpty: (context) => !Object.values(context.items).length
+  },
+})
 
 
   export default basketMachine

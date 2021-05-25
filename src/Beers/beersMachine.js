@@ -1,5 +1,6 @@
-import { Machine, assign, send } from 'xstate'
+import { Machine, assign } from 'xstate'
 
+// The state machine is serializable
 const stateMachine = {
   id: 'beer',
   initial: 'idle',
@@ -58,6 +59,7 @@ const stateMachine = {
   }
 }
 
+// State charts can sit within the app
 const stateCharts =  {
   actions: {
     handleResolved: assign({
