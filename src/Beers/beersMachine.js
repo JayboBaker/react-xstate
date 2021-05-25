@@ -59,7 +59,7 @@ const stateMachine = {
   }
 }
 
-// State charts can sit within the app
+// State charts can sit within the app or possibly be a package?
 const stateCharts =  {
   actions: {
     handleResolved: assign({
