@@ -23,7 +23,7 @@ const stateMachine = {
         },
         onError: {
           target: 'error',
-          actions: ['handleResolved'],
+          actions: ['handleError'],
         }
       },
     },
